@@ -15,4 +15,7 @@ interface InstanceDao {
 
     @Query("SELECT * FROM instances WHERE teacher LIKE :query")
     fun searchByTeacher(query: String): LiveData<List<Instance>>
+
+    @Query("SELECT * FROM instances")
+    suspend fun getAllInstancesSync(): List<Instance>
 }

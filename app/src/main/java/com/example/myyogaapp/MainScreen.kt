@@ -46,15 +46,24 @@ fun MainScreen(navController: NavController, db: AppDatabase) {
         scope.launch {
             if (isNetworkAvailable(context)) {
                 try {
-                    val courses = db.courseDao().getAllCoursesSync()
                     val firestore = FirebaseFirestore.getInstance()
+                    // Sync Courses
+                    val courses = db.courseDao().getAllCoursesSync()
                     courses.forEach { course ->
                         firestore.collection("courses")
                             .document("course_${course.courseId}")
                             .set(course)
                             .await()
                     }
-                    snackbarHostState.showSnackbar("Synced successfully")
+                    // Sync Instances
+                    val instances = db.instanceDao().getAllInstancesSync()
+                    instances.forEach { instance ->
+                        firestore.collection("instances")
+                            .document("instance_${instance.instanceId}")
+                            .set(instance)
+                            .await()
+                    }
+                    snackbarHostState.showSnackbar("Synced courses and instances successfully")
                 } catch (e: Exception) {
                     snackbarHostState.showSnackbar("Sync failed: ${e.message}")
                 }
@@ -67,7 +76,7 @@ fun MainScreen(navController: NavController, db: AppDatabase) {
     // Reset Database function with explicit type
     val resetDatabase: () -> Unit = {
         scope.launch {
-            db.courseDao().deleteAllCourses()
+            db.courseDao().deleteAllCourses() // This cascades to delete instances due to ForeignKey.CASCADE
             snackbarHostState.showSnackbar("Database reset")
         }
     }
