@@ -12,7 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Search // Added for search icon
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -73,8 +73,39 @@ fun MainScreen(navController: NavController, db: AppDatabase) {
 
     val resetDatabase: () -> Unit = {
         scope.launch {
-            db.courseDao().deleteAllCourses()
-            snackbarHostState.showSnackbar("Database reset")
+            try {
+                // Check network availability for Firestore operations
+                if (isNetworkAvailable(context)) {
+                    val firestore = FirebaseFirestore.getInstance()
+
+                    // Fetch all courses and instances to delete from Firestore
+                    val courses = db.courseDao().getAllCoursesSync()
+                    val instances = db.instanceDao().getAllInstancesSync()
+
+                    // Delete all courses from Firestore
+                    courses.forEach { course ->
+                        firestore.collection("courses")
+                            .document("course_${course.courseId}")
+                            .delete()
+                            .await()
+                    }
+
+                    // Delete all instances from Firestore
+                    instances.forEach { instance ->
+                        firestore.collection("instances")
+                            .document("instance_${instance.instanceId}")
+                            .delete()
+                            .await()
+                    }
+                }
+
+                // Clear local database (this cascades to instances due to ForeignKey.CASCADE)
+                db.courseDao().deleteAllCourses()
+
+                snackbarHostState.showSnackbar("Database reset successfully (local and cloud)")
+            } catch (e: Exception) {
+                snackbarHostState.showSnackbar("Reset failed: ${e.message}")
+            }
         }
     }
 
@@ -88,14 +119,14 @@ fun MainScreen(navController: NavController, db: AppDatabase) {
                 FloatingActionButton(
                     onClick = { navController.navigate("search") },
                     contentColor = Color.White,
-                    containerColor = Color(0xFF4A00E0) // Slightly darker purple for distinction
+                    containerColor = Color(0xFF4A00E0)
                 ) {
                     Icon(Icons.Default.Search, contentDescription = "Search Courses")
                 }
                 FloatingActionButton(
                     onClick = { navController.navigate("addCourse") },
                     contentColor = Color.White,
-                    containerColor = Color(0xFF8E24AA) // Original purple
+                    containerColor = Color(0xFF8E24AA)
                 ) {
                     Icon(Icons.Default.Add, contentDescription = "Add Course")
                 }
