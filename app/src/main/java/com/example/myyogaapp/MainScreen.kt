@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Search // Added for search icon
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -41,13 +42,11 @@ fun MainScreen(navController: NavController, db: AppDatabase) {
     var showResetDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
-    // Sync to Cloud function with explicit type
     val syncToCloud: () -> Unit = {
         scope.launch {
             if (isNetworkAvailable(context)) {
                 try {
                     val firestore = FirebaseFirestore.getInstance()
-                    // Sync Courses
                     val courses = db.courseDao().getAllCoursesSync()
                     courses.forEach { course ->
                         firestore.collection("courses")
@@ -55,7 +54,6 @@ fun MainScreen(navController: NavController, db: AppDatabase) {
                             .set(course)
                             .await()
                     }
-                    // Sync Instances
                     val instances = db.instanceDao().getAllInstancesSync()
                     instances.forEach { instance ->
                         firestore.collection("instances")
@@ -73,10 +71,9 @@ fun MainScreen(navController: NavController, db: AppDatabase) {
         }
     }
 
-    // Reset Database function with explicit type
     val resetDatabase: () -> Unit = {
         scope.launch {
-            db.courseDao().deleteAllCourses() // This cascades to delete instances due to ForeignKey.CASCADE
+            db.courseDao().deleteAllCourses()
             snackbarHostState.showSnackbar("Database reset")
         }
     }
@@ -84,18 +81,30 @@ fun MainScreen(navController: NavController, db: AppDatabase) {
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = { navController.navigate("addCourse") },
-                contentColor = Color.White,
-                containerColor = Color(0xFF8E24AA) // Purple color to match theme
+            Column(
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Add Course")
+                FloatingActionButton(
+                    onClick = { navController.navigate("search") },
+                    contentColor = Color.White,
+                    containerColor = Color(0xFF4A00E0) // Slightly darker purple for distinction
+                ) {
+                    Icon(Icons.Default.Search, contentDescription = "Search Courses")
+                }
+                FloatingActionButton(
+                    onClick = { navController.navigate("addCourse") },
+                    contentColor = Color.White,
+                    containerColor = Color(0xFF8E24AA) // Original purple
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Add Course")
+                }
             }
         },
         bottomBar = {
             NavigationBar(
-                containerColor = Color(0xFFF3E5F5), // Light purple background for elegance
-                contentColor = Color(0xFF4A00E0) // Purple text/icon color
+                containerColor = Color(0xFFF3E5F5),
+                contentColor = Color(0xFF4A00E0)
             ) {
                 NavigationBarItem(
                     icon = { Icon(Icons.Filled.CloudUpload, contentDescription = "Sync to Cloud") },
@@ -122,7 +131,7 @@ fun MainScreen(navController: NavController, db: AppDatabase) {
                 text = "My Yoga Courses",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF4A00E0), // Purple color to match theme
+                color = Color(0xFF4A00E0),
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
@@ -165,7 +174,7 @@ fun MainScreen(navController: NavController, db: AppDatabase) {
                                         text = "${course.type}${course.level?.takeIf { it.isNotEmpty() }?.let { " - $it" } ?: ""}",
                                         fontSize = 18.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = Color(0xFF4A00E0) // Purple for emphasis
+                                        color = Color(0xFF4A00E0)
                                     )
                                     Text(
                                         text = "Every ${course.dayOfWeek} at ${course.time}",
@@ -196,7 +205,7 @@ fun MainScreen(navController: NavController, db: AppDatabase) {
                                     Icon(
                                         imageVector = Icons.Default.Delete,
                                         contentDescription = "Delete Course",
-                                        tint = Color(0xFFE91E63) // Pinkish-red color
+                                        tint = Color(0xFFE91E63)
                                     )
                                 }
                             }
@@ -207,7 +216,6 @@ fun MainScreen(navController: NavController, db: AppDatabase) {
         }
     }
 
-    // Confirmation dialog for Reset Database
     if (showResetDialog) {
         AlertDialog(
             onDismissRequest = { showResetDialog = false },
@@ -234,7 +242,6 @@ fun MainScreen(navController: NavController, db: AppDatabase) {
     }
 }
 
-// Network availability check function
 fun isNetworkAvailable(context: Context): Boolean {
     val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     val network = connectivityManager.activeNetwork ?: return false

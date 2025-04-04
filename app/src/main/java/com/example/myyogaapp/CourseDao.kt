@@ -32,11 +32,18 @@ interface CourseDao {
     """)
     fun getCoursesWithNextInstance(currentDateStr: String): LiveData<List<CourseWithInstance>>
 
-    // Added for sync functionality
     @Query("SELECT * FROM courses")
     suspend fun getAllCoursesSync(): List<Course>
 
-    // Added for reset functionality
     @Query("DELETE FROM courses")
     suspend fun deleteAllCourses()
+
+    // Added for search functionality
+    @Query("""
+        SELECT * FROM courses 
+        WHERE LOWER(type) LIKE LOWER(:query) 
+        OR LOWER(level) LIKE LOWER(:query) 
+        OR LOWER(dayOfWeek) LIKE LOWER(:query)
+    """)
+    fun searchCourses(query: String): LiveData<List<Course>>
 }

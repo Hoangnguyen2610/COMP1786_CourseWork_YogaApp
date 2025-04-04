@@ -78,7 +78,7 @@ fun MyApp(db: AppDatabase) {
             val time = backStackEntry.arguments?.getString("time") ?: ""
             val capacity = backStackEntry.arguments?.getInt("capacity") ?: 0
             val duration = backStackEntry.arguments?.getInt("duration") ?: 0
-            val price = backStackEntry.arguments?.getFloat("price") ?: 0f // Fixed typo: "即将" to "price"
+            val price = backStackEntry.arguments?.getFloat("price") ?: 0f
             val type = backStackEntry.arguments?.getString("type") ?: ""
             val description = backStackEntry.arguments?.getString("description") ?: ""
             val level = backStackEntry.arguments?.getString("level") ?: ""
@@ -187,6 +187,9 @@ fun MyApp(db: AppDatabase) {
         ) { backStackEntry ->
             val courseId = backStackEntry.arguments?.getInt("courseId") ?: 0
             AddInstanceScreen(courseId = courseId, navController = navController, db = db)
+        }
+        composable("search") {
+            SearchScreen(navController = navController, db = db)
         }
     }
 }

@@ -13,7 +13,7 @@ interface InstanceDao {
     @Insert
     suspend fun insertInstance(instance: Instance)
 
-    @Query("SELECT * FROM instances WHERE teacher LIKE :query")
+    @Query("SELECT * FROM instances WHERE LOWER(teacher) LIKE LOWER(:query)")
     fun searchByTeacher(query: String): LiveData<List<Instance>>
 
     @Query("SELECT * FROM instances")
