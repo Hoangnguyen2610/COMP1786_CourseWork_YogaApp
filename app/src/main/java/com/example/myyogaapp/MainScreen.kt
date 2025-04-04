@@ -21,10 +21,14 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun MainScreen(navController: NavController, db: AppDatabase) {
-    val courses by db.courseDao().getAllCourses().observeAsState(initial = emptyList())
+    val currentDateStr = remember { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date()) }
+    val coursesWithNextInstance by db.courseDao().getCoursesWithNextInstance(currentDateStr).observeAsState(initial = emptyList())
     val scope = rememberCoroutineScope()
 
     Scaffold(
@@ -55,7 +59,7 @@ fun MainScreen(navController: NavController, db: AppDatabase) {
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                if (courses.isEmpty()) {
+                if (coursesWithNextInstance.isEmpty()) {
                     item {
                         Text(
                             text = "No courses available. Add a course to get started!",
@@ -68,7 +72,8 @@ fun MainScreen(navController: NavController, db: AppDatabase) {
                         )
                     }
                 } else {
-                    items(courses) { course ->
+                    items(coursesWithNextInstance) { courseWithInstance ->
+                        val course = courseWithInstance.course
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -81,14 +86,36 @@ fun MainScreen(navController: NavController, db: AppDatabase) {
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(16.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(
-                                    text = "${course.type} on ${course.dayOfWeek} at ${course.time}",
-                                    fontSize = 16.sp,
-                                    color = Color.Black
-                                )
+                                Column(
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Text(
+                                        text = "${course.type}${course.level?.takeIf { it.isNotEmpty() }?.let { " - $it" } ?: ""}",
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xFF4A00E0) // Purple for emphasis
+                                    )
+                                    Text(
+                                        text = "Every ${course.dayOfWeek} at ${course.time}",
+                                        fontSize = 14.sp,
+                                        color = Color.Gray
+                                    )
+                                    if (courseWithInstance.nextDate != null && courseWithInstance.nextTeacher != null) {
+                                        Text(
+                                            text = "Next: ${courseWithInstance.nextDate} with ${courseWithInstance.nextTeacher}",
+                                            fontSize = 12.sp,
+                                            color = Color.DarkGray
+                                        )
+                                    } else {
+                                        Text(
+                                            text = "No upcoming instances",
+                                            fontSize = 12.sp,
+                                            color = Color.DarkGray
+                                        )
+                                    }
+                                }
                                 IconButton(
                                     onClick = {
                                         scope.launch {

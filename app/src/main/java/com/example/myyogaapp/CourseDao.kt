@@ -23,4 +23,12 @@ interface CourseDao {
 
     @Delete
     suspend fun deleteCourse(course: Course)
+
+    @Query("""
+        SELECT c.*, 
+               (SELECT i.date FROM instances i WHERE i.courseId = c.courseId AND i.date >= :currentDateStr ORDER BY i.date LIMIT 1) AS nextDate,
+               (SELECT i.teacher FROM instances i WHERE i.courseId = c.courseId AND i.date >= :currentDateStr ORDER BY i.date LIMIT 1) AS nextTeacher
+        FROM courses c
+    """)
+    fun getCoursesWithNextInstance(currentDateStr: String): LiveData<List<CourseWithInstance>>
 }

@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class) // Add this to opt-in to experimental Material3 APIs
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PreviewCourseScreen(
     navController: NavController,
@@ -23,8 +23,8 @@ fun PreviewCourseScreen(
     db: AppDatabase
 ) {
     val scope = rememberCoroutineScope()
+    var error by remember { mutableStateOf<String?>(null) }
 
-    // Gradient background matching CourseDetailScreen
     val gradient = Brush.verticalGradient(
         colors = listOf(Color(0xFFE1BEE7), Color(0xFFCE93D8))
     )
@@ -38,7 +38,7 @@ fun PreviewCourseScreen(
                         text = "Preview Course",
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF4A00E0) // Purple color matching CourseDetailScreen
+                        color = Color(0xFF4A00E0)
                     )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -112,13 +112,21 @@ fun PreviewCourseScreen(
                 }
             }
 
+            error?.let {
+                Text(
+                    text = it,
+                    color = Color.Red,
+                    fontSize = 14.sp,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 OutlinedButton(
                     onClick = {
-                        // Pass the course details back to AddCourseScreen for editing
                         navController.navigate(
                             "addCourse?dayOfWeek=${course.dayOfWeek}&time=${course.time}&capacity=${course.capacity}&duration=${course.duration}&price=${course.price}&type=${course.type}&description=${course.description}&level=${course.level}&id=${course.courseId}"
                         )
@@ -128,7 +136,7 @@ fun PreviewCourseScreen(
                         .height(56.dp)
                         .clip(RoundedCornerShape(12.dp)),
                     colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = Color(0xFF4A00E0) // Purple color for the border and text
+                        contentColor = Color(0xFF4A00E0)
                     )
                 ) {
                     Text("Edit", fontSize = 18.sp)
@@ -136,9 +144,13 @@ fun PreviewCourseScreen(
                 Button(
                     onClick = {
                         scope.launch {
-                            db.courseDao().insertCourse(course)
-                            navController.navigate("main") {
-                                popUpTo("main") { inclusive = true }
+                            try {
+                                db.courseDao().insertCourse(course)
+                                navController.navigate("main") {
+                                    popUpTo("main") { inclusive = true }
+                                }
+                            } catch (e: Exception) {
+                                error = "Failed to save course: ${e.message}"
                             }
                         }
                     },
@@ -146,7 +158,9 @@ fun PreviewCourseScreen(
                         .weight(1f)
                         .height(56.dp)
                         .clip(RoundedCornerShape(12.dp)),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8E24AA)) // Purple color matching CourseDetailScreen
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF8E24AA)
+                    )
                 ) {
                     Text("Save", fontSize = 18.sp, color = Color.White)
                 }

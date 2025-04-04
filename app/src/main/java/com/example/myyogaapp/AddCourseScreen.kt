@@ -21,7 +21,6 @@ import androidx.navigation.NavController
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddCourseScreen(navController: NavController, db: AppDatabase) {
-    // Parse query parameters for editing
     val dayOfWeekParam = navController.currentBackStackEntry?.arguments?.getString("dayOfWeek") ?: ""
     val timeParam = navController.currentBackStackEntry?.arguments?.getString("time") ?: ""
     val capacityParam = navController.currentBackStackEntry?.arguments?.getString("capacity")?.toIntOrNull() ?: 0
@@ -31,7 +30,6 @@ fun AddCourseScreen(navController: NavController, db: AppDatabase) {
     val descriptionParam = navController.currentBackStackEntry?.arguments?.getString("description") ?: ""
     val levelParam = navController.currentBackStackEntry?.arguments?.getString("level") ?: ""
 
-    // State variables
     var dayOfWeek by remember { mutableStateOf(dayOfWeekParam) }
     var time by remember { mutableStateOf(timeParam) }
     var capacity by remember { mutableStateOf(if (capacityParam != 0) capacityParam.toString() else "") }
@@ -42,12 +40,10 @@ fun AddCourseScreen(navController: NavController, db: AppDatabase) {
     var level by remember { mutableStateOf(levelParam) }
     var error by remember { mutableStateOf("") }
 
-    // Dropdown states
     var dayExpanded by remember { mutableStateOf(false) }
     var timeExpanded by remember { mutableStateOf(false) }
     var typeExpanded by remember { mutableStateOf(false) }
 
-    // Dropdown options
     val dayOptions = listOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
     val timeOptions = listOf(
         "08:00", "09:00", "10:00", "11:00", "12:00",
@@ -55,7 +51,6 @@ fun AddCourseScreen(navController: NavController, db: AppDatabase) {
     )
     val typeOptions = listOf("Flow Yoga", "Aerial Yoga", "Family Yoga")
 
-    // Gradient background
     val gradient = Brush.verticalGradient(
         colors = listOf(Color(0xFFE1BEE7), Color(0xFFCE93D8))
     )
@@ -86,7 +81,6 @@ fun AddCourseScreen(navController: NavController, db: AppDatabase) {
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Day of Week Dropdown
             ExposedDropdownMenuBox(
                 expanded = dayExpanded,
                 onExpandedChange = { dayExpanded = !dayExpanded },
@@ -119,7 +113,6 @@ fun AddCourseScreen(navController: NavController, db: AppDatabase) {
                 }
             }
 
-            // Time Dropdown
             ExposedDropdownMenuBox(
                 expanded = timeExpanded,
                 onExpandedChange = { timeExpanded = !timeExpanded },
@@ -152,7 +145,6 @@ fun AddCourseScreen(navController: NavController, db: AppDatabase) {
                 }
             }
 
-            // Capacity Input (Number)
             OutlinedTextField(
                 value = capacity,
                 onValueChange = { capacity = it },
@@ -163,7 +155,6 @@ fun AddCourseScreen(navController: NavController, db: AppDatabase) {
                     .clip(RoundedCornerShape(12.dp))
             )
 
-            // Duration Input (Number)
             OutlinedTextField(
                 value = duration,
                 onValueChange = { duration = it },
@@ -174,7 +165,6 @@ fun AddCourseScreen(navController: NavController, db: AppDatabase) {
                     .clip(RoundedCornerShape(12.dp))
             )
 
-            // Price Input (Number)
             OutlinedTextField(
                 value = price,
                 onValueChange = { price = it },
@@ -185,7 +175,6 @@ fun AddCourseScreen(navController: NavController, db: AppDatabase) {
                     .clip(RoundedCornerShape(12.dp))
             )
 
-            // Type Dropdown
             ExposedDropdownMenuBox(
                 expanded = typeExpanded,
                 onExpandedChange = { typeExpanded = !typeExpanded },
@@ -218,7 +207,6 @@ fun AddCourseScreen(navController: NavController, db: AppDatabase) {
                 }
             }
 
-            // Description Input
             OutlinedTextField(
                 value = description,
                 onValueChange = { description = it },
@@ -228,7 +216,6 @@ fun AddCourseScreen(navController: NavController, db: AppDatabase) {
                     .clip(RoundedCornerShape(12.dp))
             )
 
-            // Level Input
             OutlinedTextField(
                 value = level,
                 onValueChange = { level = it },
@@ -238,7 +225,6 @@ fun AddCourseScreen(navController: NavController, db: AppDatabase) {
                     .clip(RoundedCornerShape(12.dp))
             )
 
-            // Error Message
             if (error.isNotEmpty()) {
                 Text(
                     text = error,
@@ -248,7 +234,6 @@ fun AddCourseScreen(navController: NavController, db: AppDatabase) {
                 )
             }
 
-            // Preview Button
             Button(
                 onClick = {
                     if (dayOfWeek.isEmpty() || time.isEmpty() || capacity.isEmpty() ||
