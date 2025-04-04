@@ -31,4 +31,12 @@ interface CourseDao {
         FROM courses c
     """)
     fun getCoursesWithNextInstance(currentDateStr: String): LiveData<List<CourseWithInstance>>
+
+    // Added for sync functionality
+    @Query("SELECT * FROM courses")
+    suspend fun getAllCoursesSync(): List<Course>
+
+    // Added for reset functionality
+    @Query("DELETE FROM courses")
+    suspend fun deleteAllCourses()
 }
