@@ -98,4 +98,5 @@ dependencies {
 
     implementation(libs.androidx.lifecycle.runtime.ktx) // Provides LiveData
     implementation("androidx.compose.runtime:runtime-livedata:1.5.4") // Provides observeAsState via BOM
+    implementation("androidx.compose.material3:material3:1.2.1")
 }
