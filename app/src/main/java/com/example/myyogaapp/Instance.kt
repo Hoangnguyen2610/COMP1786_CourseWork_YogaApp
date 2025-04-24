@@ -1,4 +1,3 @@
-// Instance.kt
 package com.example.myyogaapp
 
 import androidx.room.Entity

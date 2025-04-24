@@ -38,7 +38,7 @@ interface CourseDao {
     @Query("DELETE FROM courses")
     suspend fun deleteAllCourses()
 
-    // Added for search functionality
+    // search functionality
     @Query("""
         SELECT * FROM courses 
         WHERE LOWER(type) LIKE LOWER(:query) 

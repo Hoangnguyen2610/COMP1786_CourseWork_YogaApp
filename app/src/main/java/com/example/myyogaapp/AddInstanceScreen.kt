@@ -24,7 +24,7 @@ import androidx.navigation.NavController
 import java.text.SimpleDateFormat
 import java.util.*
 
-// Function to show the DatePickerDialog
+// Function DatePicker
 fun showDatePicker(context: android.content.Context, onDateSelected: (String) -> Unit) {
     val calendar = Calendar.getInstance()
     val year = calendar.get(Calendar.YEAR)
@@ -34,7 +34,7 @@ fun showDatePicker(context: android.content.Context, onDateSelected: (String) ->
     val datePickerDialog = DatePickerDialog(
         context,
         { _, selectedYear, selectedMonth, selectedDay ->
-            // Format the date as yyyy-MM-dd (e.g., 2023-11-06)
+            // yyyy-MM-dd
             val selectedDate = String.format("%04d-%02d-%02d", selectedYear, selectedMonth + 1, selectedDay)
             onDateSelected(selectedDate)
         },
@@ -115,7 +115,7 @@ fun AddInstanceScreen(courseId: Int, navController: NavController, db: AppDataba
                     }
                 }
             )
-            // Hint to guide the user
+
             if (course != null) {
                 Text(
                     text = "Please select a ${course.dayOfWeek}.",
@@ -159,7 +159,7 @@ fun AddInstanceScreen(courseId: Int, navController: NavController, db: AppDataba
                         val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
                         try {
                             val parsedDate = formatter.parse(date)
-                            // Use Locale.ENGLISH for consistent day names
+                            // I use Locale.ENGLISH for consistent day names
                             val dayOfWeek = SimpleDateFormat("EEEE", Locale.ENGLISH).format(parsedDate).uppercase()
                             if (course?.dayOfWeek?.uppercase() != dayOfWeek) {
                                 error = "Date must match course day: ${course?.dayOfWeek}"

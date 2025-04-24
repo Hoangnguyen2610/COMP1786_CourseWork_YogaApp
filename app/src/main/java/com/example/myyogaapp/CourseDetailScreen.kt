@@ -28,7 +28,7 @@ fun CourseDetailScreen(
         colors = listOf(Color(0xFFE1BEE7), Color(0xFFCE93D8))
     )
 
-    // Fetch instances for the given course
+    // Fetch instances
     val instanceDao = db.instanceDao()
     val instances by instanceDao.getInstancesForCourse(course.courseId).observeAsState(initial = emptyList())
 
